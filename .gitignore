@@ -1,0 +1,14 @@
+# Data files
+IVE_bidask1min.txt
+
+# Python virtual environment
+.venv/
+venv/
+ENV/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/

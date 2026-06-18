@@ -1,0 +1,37 @@
+# Core PyTorch and Vision
+torch>=2.0
+torchvision
+
+# V-JEPA 2 Core Dependencies
+timm
+transformers
+peft
+einops
+beartype
+psutil
+h5py
+fire
+python-box
+scikit-image
+ftfy
+pyyaml
+numpy
+opencv-python
+braceexpand
+webdataset
+iopath
+
+# macOS-compatible decord (decord2) / standard decord for other OS
+decord; sys_platform != 'darwin'
+decord2; sys_platform == 'darwin'
+
+# Visualization and Data Analysis (for market explorations)
+pandas
+matplotlib
+seaborn
+jupyter
+
+# Training / Experiment Tracking
+tensorboard
+wandb
+submitit

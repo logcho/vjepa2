@@ -6,9 +6,16 @@ IVE_bidask1min.txt
 venv/
 ENV/
 
+# Environment variables / private keys
+.env
+
 # Python cache files
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .pytest_cache/
+
+# Databento data files (large datasets)
+databento_data/*.zst
+*.zip

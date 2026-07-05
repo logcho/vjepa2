@@ -276,6 +276,69 @@ def save_keyframe_grid(original, pca_global, pca_per_frame, flicker_global, outp
     print(f"Saved keyframe grid image to: {output_path}")
 
 
+def save_trajectory_plot(pca_global, pca_per_frame, output_path, static_pt=(40, 40), moving_pt=(150, 128)):
+    """
+    Plots the R, G, B PCA trajectories over time for a static background point
+    and a moving foreground point to compare Global vs Per-frame stability.
+    """
+    T = pca_global.shape[0]
+    frames = np.arange(T)
+    
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+    
+    sy, sx = static_pt
+    my, mx = moving_pt
+    
+    # 1. Static Point - Global PCA
+    axes[0, 0].plot(frames, pca_global[:, sy, sx, 0], 'r-', label='Red (Comp 1)')
+    axes[0, 0].plot(frames, pca_global[:, sy, sx, 1], 'g-', label='Green (Comp 2)')
+    axes[0, 0].plot(frames, pca_global[:, sy, sx, 2], 'b-', label='Blue (Comp 3)')
+    axes[0, 0].set_title(f"Static Point ({sx}, {sy}) - Global PCA (Stable)")
+    axes[0, 0].set_ylabel("PCA Color Value (0-255)")
+    axes[0, 0].set_xlabel("Frame Index")
+    axes[0, 0].legend()
+    axes[0, 0].grid(True, alpha=0.3)
+    axes[0, 0].set_ylim(-10, 265)
+    
+    # 2. Static Point - Per-frame PCA
+    axes[0, 1].plot(frames, pca_per_frame[:, sy, sx, 0], 'r--', label='Red (Comp 1)')
+    axes[0, 1].plot(frames, pca_per_frame[:, sy, sx, 1], 'g--', label='Green (Comp 2)')
+    axes[0, 1].plot(frames, pca_per_frame[:, sy, sx, 2], 'b--', label='Blue (Comp 3)')
+    axes[0, 1].set_title(f"Static Point ({sx}, {sy}) - Per-frame PCA (Flicker)")
+    axes[0, 1].set_ylabel("PCA Color Value (0-255)")
+    axes[0, 1].set_xlabel("Frame Index")
+    axes[0, 1].legend()
+    axes[0, 1].grid(True, alpha=0.3)
+    axes[0, 1].set_ylim(-10, 265)
+    
+    # 3. Moving Point - Global PCA
+    axes[1, 0].plot(frames, pca_global[:, my, mx, 0], 'r-', label='Red (Comp 1)')
+    axes[1, 0].plot(frames, pca_global[:, my, mx, 1], 'g-', label='Green (Comp 2)')
+    axes[1, 0].plot(frames, pca_global[:, my, mx, 2], 'b-', label='Blue (Comp 3)')
+    axes[1, 0].set_title(f"Moving Point ({mx}, {my}) - Global PCA (Smooth)")
+    axes[1, 0].set_ylabel("PCA Color Value (0-255)")
+    axes[1, 0].set_xlabel("Frame Index")
+    axes[1, 0].legend()
+    axes[1, 0].grid(True, alpha=0.3)
+    axes[1, 0].set_ylim(-10, 265)
+    
+    # 4. Moving Point - Per-frame PCA
+    axes[1, 1].plot(frames, pca_per_frame[:, my, mx, 0], 'r--', label='Red (Comp 1)')
+    axes[1, 1].plot(frames, pca_per_frame[:, my, mx, 1], 'g--', label='Green (Comp 2)')
+    axes[1, 1].plot(frames, pca_per_frame[:, my, mx, 2], 'b--', label='Blue (Comp 3)')
+    axes[1, 1].set_title(f"Moving Point ({mx}, {my}) - Per-frame PCA (Noisy)")
+    axes[1, 1].set_ylabel("PCA Color Value (0-255)")
+    axes[1, 1].set_xlabel("Frame Index")
+    axes[1, 1].legend()
+    axes[1, 1].grid(True, alpha=0.3)
+    axes[1, 1].set_ylim(-10, 265)
+    
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f"Saved trajectory plot to: {output_path}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="V-JEPA 2.1 Dense Feature PCA Visualization")
     parser.add_argument("--video_path", type=str, default=SAMPLE_VIDEO_PATH, help="Path to input video")
@@ -400,6 +463,13 @@ def main():
         flicker_global,
         os.path.join(args.output_dir, "keyframe_grid.png"),
         num_keyframes=8
+    )
+
+    # 15. Save static Trajectory Plot (Method 3)
+    save_trajectory_plot(
+        pca_frames_global,
+        pca_frames_per_frame,
+        os.path.join(args.output_dir, "pca_trajectory_plot.png")
     )
     print("\nSUCCESS! PCA stability visualization files generated in:", args.output_dir)
 

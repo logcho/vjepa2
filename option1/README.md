@@ -6,15 +6,15 @@ This directory contains the code, visualizations, and scientific findings for **
 
 ## Directory Structure
 
-* [visualize_pca.py](file:///Users/loganchoi/Desktop/vjepa2/option1/visualize_pca.py): Main execution script for token extraction, SVD-based PCA projection, interpolation, overlays, and stability analyses.
-* [visualizations/](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations): Directory containing output videos and static graphs:
-  * [pca_raw.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_raw.mp4): Raw projected 3-component PCA colors over the video.
-  * [pca_overlay.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_overlay.mp4): Alpha-blended overlay of PCA colors onto original frames.
-  * [pca_side_by_side.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_side_by_side.mp4): Original frames side-by-side with global PCA.
-  * [pca_global_vs_per_frame.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_global_vs_per_frame.mp4): Side-by-side comparison of Global SVD vs. Per-Frame SVD projection.
-  * [pca_flicker_comparison.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_flicker_comparison.mp4): Side-by-side comparison of Global vs. Per-Frame temporal variance (flicker).
-  * [keyframe_grid.png](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/keyframe_grid.png): 4-row grid displaying Keyframes of original, global, per-frame, and temporal variance.
-  * [pca_trajectory_plot.png](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_trajectory_plot.png): Quantitative line plots of PCA component trajectories over all 64 frames.
+* [visualize_pca.py](./visualize_pca.py): Main execution script for token extraction, SVD-based PCA projection, interpolation, overlays, and stability analyses.
+* [visualizations/](./visualizations): Directory containing output videos and static graphs:
+  * [pca_raw.mp4](./visualizations/pca_raw.mp4): Raw projected 3-component PCA colors over the video.
+  * [pca_overlay.mp4](./visualizations/pca_overlay.mp4): Alpha-blended overlay of PCA colors onto original frames.
+  * [pca_side_by_side.mp4](./visualizations/pca_side_by_side.mp4): Original frames side-by-side with global PCA.
+  * [pca_global_vs_per_frame.mp4](./visualizations/pca_global_vs_per_frame.mp4): Side-by-side comparison of Global SVD vs. Per-Frame SVD projection.
+  * [pca_flicker_comparison.mp4](./visualizations/pca_flicker_comparison.mp4): Side-by-side comparison of Global vs. Per-Frame temporal variance (flicker).
+  * [keyframe_grid.png](./visualizations/keyframe_grid.png): 4-row grid displaying Keyframes of original, global, per-frame, and temporal variance.
+  * [pca_trajectory_plot.png](./visualizations/pca_trajectory_plot.png): Quantitative line plots of PCA component trajectories over all 64 frames.
 
 ---
 

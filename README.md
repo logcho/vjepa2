@@ -164,10 +164,10 @@ This script will:
 
 We have implemented and completed deep analyses on the following research avenues:
 
-### [Option 1: Dense Feature Visualization and PCA-based Temporal Tracking](file:///Users/loganchoi/Desktop/vjepa2/option1/README.md)
+### [Option 1: Dense Feature Visualization and PCA-based Temporal Tracking](./option1/README.md)
 * **Goal**: Probing the latent space representations of V-JEPA 2.1 by projecting 1024-D token features onto 3-component PCA (RGB) color spaces to track semantic parts across frame transformations.
 * **Findings**:
   * **Temporal Continuity**: Global SVD locked coordinate projections yield highly stable, smooth tracking overlays, demonstrating V-JEPA's strength in video dynamics compared to pure per-frame spatial models.
   * **Transformer Contextual Leakage**: We mapped and explained how Self-Attention causes slight background representation ripples as the foreground bowler moves.
   * **Stability Analysis**: We introduced quantitative **Flicker Maps (Temporal Variance)** and **Feature Trajectory Plots** comparing stable global coordinate projections vs. chaotic per-frame projections.
-* Refer to the dedicated [Option 1 README](file:///Users/loganchoi/Desktop/vjepa2/option1/README.md) for full methodologies, visual results, and execution guides.
+* Refer to the dedicated [Option 1 README](./option1/README.md) for full methodologies, visual results, and execution guides.

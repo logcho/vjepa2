@@ -160,7 +160,7 @@ This script will:
 
 ---
 
-## 🔬 Research & Explorations
+## Research & Explorations
 
 We have implemented and completed deep analyses on the following research avenues:
 

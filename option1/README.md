@@ -4,21 +4,21 @@ This directory contains the code, visualizations, and scientific findings for **
 
 ---
 
-## 📂 Directory Structure
+## Directory Structure
 
-* 📄 [visualize_pca.py](file:///Users/loganchoi/Desktop/vjepa2/option1/visualize_pca.py): Main execution script for token extraction, SVD-based PCA projection, interpolation, overlays, and stability analyses.
-* 📂 [visualizations/](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations): Directory containing output videos and static graphs:
-  * 🎥 [pca_raw.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_raw.mp4): Raw projected 3-component PCA colors over the video.
-  * 🎥 [pca_overlay.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_overlay.mp4): Alpha-blended overlay of PCA colors onto original frames.
-  * 🎥 [pca_side_by_side.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_side_by_side.mp4): Original frames side-by-side with global PCA.
-  * 🎥 [pca_global_vs_per_frame.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_global_vs_per_frame.mp4): Side-by-side comparison of Global SVD vs. Per-Frame SVD projection.
-  * 🎥 [pca_flicker_comparison.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_flicker_comparison.mp4): Side-by-side comparison of Global vs. Per-Frame temporal variance (flicker).
-  * 🖼️ [keyframe_grid.png](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/keyframe_grid.png): 4-row grid displaying Keyframes of original, global, per-frame, and temporal variance.
-  * 🖼️ [pca_trajectory_plot.png](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_trajectory_plot.png): Quantitative line plots of PCA component trajectories over all 64 frames.
+* [visualize_pca.py](file:///Users/loganchoi/Desktop/vjepa2/option1/visualize_pca.py): Main execution script for token extraction, SVD-based PCA projection, interpolation, overlays, and stability analyses.
+* [visualizations/](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations): Directory containing output videos and static graphs:
+  * [pca_raw.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_raw.mp4): Raw projected 3-component PCA colors over the video.
+  * [pca_overlay.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_overlay.mp4): Alpha-blended overlay of PCA colors onto original frames.
+  * [pca_side_by_side.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_side_by_side.mp4): Original frames side-by-side with global PCA.
+  * [pca_global_vs_per_frame.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_global_vs_per_frame.mp4): Side-by-side comparison of Global SVD vs. Per-Frame SVD projection.
+  * [pca_flicker_comparison.mp4](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_flicker_comparison.mp4): Side-by-side comparison of Global vs. Per-Frame temporal variance (flicker).
+  * [keyframe_grid.png](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/keyframe_grid.png): 4-row grid displaying Keyframes of original, global, per-frame, and temporal variance.
+  * [pca_trajectory_plot.png](file:///Users/loganchoi/Desktop/vjepa2/option1/visualizations/pca_trajectory_plot.png): Quantitative line plots of PCA component trajectories over all 64 frames.
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
 To run the pipeline and regenerate all visualizations:
 ```bash
@@ -35,7 +35,7 @@ To run the pipeline and regenerate all visualizations:
 
 ---
 
-## 🔬 Scientific & Architectural Insights
+## Scientific & Architectural Insights
 
 Our exploration of V-JEPA 2.1 features led to several key findings regarding self-supervised representation stability:
 
@@ -51,4 +51,14 @@ Even when a region in the video is completely static (e.g. a background wall), t
 To prove representation stability, the project implements three analytical methods:
 1. **Global vs. Per-Frame PCA**: Recalculating PCA independently per-frame rotates the projection coordinate axes randomly, resulting in chaotic color flickers (`pca_global_vs_per_frame.mp4`). Global PCA preserves the coordinate space across all frames, establishing a coherent tracking manifold.
 2. **Flicker Map (Temporal Variance)**: By calculating the standard deviation of colors over a sliding window of 5 frames, we visualize instability. Static areas remain entirely **black** (zero variance) under Global PCA, whereas Per-Frame PCA results in a flashing, white-noise variance storm (`pca_flicker_comparison.mp4`).
-3. **Feature Trajectory Plotting**: By graphing the projected component values of individual pixels over all 64 frames, we show that static background regions display **flat, straight lines** in V-JEPA, whereas unstable per-frame baselines show jagged, erratic spikes (`pca_trajectory_plot.png`).
+3. **Feature Trajectory Plotting**: By graphing the projected component values of individual pixels over all 64 frames, we show that static background regions display **flat, straight lines** in V-JEPA, whereas unstable per-frame baselines show jagged, erratic spikes.
+
+### Stability Visualizations
+
+#### Keyframe Comparison Grid
+Below is the generated keyframe grid showing the original video, the Global (stable) PCA, the Per-frame (flickering) PCA, and the Flicker Map (Temporal Variance):
+![Keyframe Grid](visualizations/keyframe_grid.png)
+
+#### Feature Trajectory Stability Plot
+Below is the trajectory plot showing how the PCA components of a static background pixel $(40, 40)$ and a moving bowler pixel $(128, 150)$ evolve over 64 frames. Notice the completely flat lines for the global PCA on the static point, contrasted against the erratic spikes of the per-frame PCA:
+![Trajectory Plot](visualizations/pca_trajectory_plot.png)

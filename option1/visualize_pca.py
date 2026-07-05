@@ -212,35 +212,63 @@ def save_video_clip(frames, output_path, fps=15.0):
     print(f"Saved video to: {output_path}")
 
 
-def save_keyframe_grid(original, pca, overlay, output_path, num_keyframes=8):
+def compute_temporal_variance(pca_frames, window_size=5):
     """
-    Saves a grid comparing original frames, PCA visualizations, and overlays.
+    Computes local temporal variance (standard deviation) of PCA colors over time
+    to measure and visualize representational stability.
+    """
+    T, H, W, C = pca_frames.shape
+    var_frames = np.zeros_like(pca_frames, dtype=np.float32)
+    half_w = window_size // 2
+    for t in range(T):
+        t_start = max(0, t - half_w)
+        t_end = min(T, t + half_w + 1)
+        var_frames[t] = np.var(pca_frames[t_start:t_end], axis=0)
+    
+    # Convert variance to standard deviation
+    std_frames = np.sqrt(var_frames)
+    # Scale to make small flickers highly visible (e.g. std of 15 maps to 150)
+    std_frames = np.clip(std_frames * 10.0, 0, 255).astype(np.uint8)
+    return std_frames
+
+
+def save_keyframe_grid(original, pca_global, pca_per_frame, flicker_global, output_path, num_keyframes=8):
+    """
+    Saves a 4-row grid comparing original frames, Global PCA, Per-frame PCA, and Flicker Map.
     """
     T = original.shape[0]
     indices = np.linspace(0, T - 1, num_keyframes, dtype=int)
     
-    fig, axes = plt.subplots(3, num_keyframes, figsize=(2 * num_keyframes, 6))
+    fig, axes = plt.subplots(4, num_keyframes, figsize=(2.2 * num_keyframes, 8))
     
     for idx, frame_idx in enumerate(indices):
         # Row 0: Original
         axes[0, idx].imshow(original[frame_idx])
         axes[0, idx].axis('off')
         if idx == 0:
-            axes[0, idx].set_ylabel("Original", fontsize=12, labelpad=10)
+            axes[0, idx].set_ylabel("Original", fontsize=11, labelpad=12)
             
-        # Row 1: PCA Color Map
-        axes[1, idx].imshow(pca[frame_idx])
+        # Row 1: Global PCA (Stable)
+        axes[1, idx].imshow(pca_global[frame_idx])
         axes[1, idx].axis('off')
         if idx == 0:
-            axes[1, idx].set_ylabel("PCA Map", fontsize=12, labelpad=10)
+            axes[1, idx].set_ylabel("Global PCA\n(Stable)", fontsize=11, labelpad=12)
             
-        # Row 2: Overlay
-        axes[2, idx].imshow(overlay[frame_idx])
+        # Row 2: Per-frame PCA (Flicker)
+        axes[2, idx].imshow(pca_per_frame[frame_idx])
         axes[2, idx].axis('off')
         if idx == 0:
-            axes[2, idx].set_ylabel("Overlay", fontsize=12, labelpad=10)
+            axes[2, idx].set_ylabel("Per-frame PCA\n(Flicker)", fontsize=11, labelpad=12)
             
-        axes[0, idx].set_title(f"F {frame_idx}", fontsize=9)
+        # Row 3: Flicker Map (Variance)
+        # Compute mean of channels to display as grayscale heatmap
+        flicker_gray = np.mean(flicker_global[frame_idx], axis=2)
+        axes[3, idx].imshow(flicker_gray, cmap='hot')
+        axes[3, idx].axis('off')
+        if idx == 0:
+            axes[3, idx].set_ylabel("Flicker Map\n(Variance)", fontsize=11, labelpad=12)
+            
+        axes[0, idx].set_title(f"Frame {frame_idx}", fontsize=9)
 
     plt.tight_layout()
     plt.savefig(output_path, dpi=150, bbox_inches='tight')
@@ -255,7 +283,6 @@ def main():
     parser.add_argument("--output_dir", type=str, default="option1/visualizations", help="Output directory")
     parser.add_argument("--num_frames", type=str, default="64", help="Number of frames to sample")
     parser.add_argument("--stride", type=str, default="2", help="Sampling stride")
-    parser.add_argument("--pca_per_frame", action="store_true", help="Compute PCA per frame instead of globally")
     parser.add_argument("--alpha", type=str, default="0.5", help="Alpha blending weight for overlay")
     args = parser.parse_args()
 
@@ -305,54 +332,76 @@ def main():
     if features.shape[0] != expected_tokens:
         print(f"Warning: Extracted tokens {features.shape[0]} doesn't match expected {expected_tokens}. "
               "Falling back to dynamic grid parsing.")
-        # If tokens do not match, we'll try to deduce the closest sizes
         t_p = num_frames // tubelet_size
         h_p = int(np.sqrt(features.shape[0] / t_p))
         w_p = h_p
         print(f"Deduced grid dimensions: T_p={t_p}, H_p={h_p}, W_p={w_p}")
 
-    # 8. Compute PCA Projection
-    projected = compute_pca(features, t_p, h_p, w_p, pca_per_frame=args.pca_per_frame)
+    # 8. Compute BOTH Global PCA and Per-Frame PCA
+    projected_global = compute_pca(features, t_p, h_p, w_p, pca_per_frame=False)
+    projected_per_frame = compute_pca(features, t_p, h_p, w_p, pca_per_frame=True)
 
     # 9. Normalize components to [0, 1] range
-    normalized_pca = normalize_components(projected)
+    normalized_global = normalize_components(projected_global)
+    normalized_per_frame = normalize_components(projected_per_frame)
 
     # 10. Interpolate features to original crop size (T x 256 x 256)
-    pca_frames = interpolate_and_render(normalized_pca, num_frames, 256, 256)
+    pca_frames_global = interpolate_and_render(normalized_global, num_frames, 256, 256)
+    pca_frames_per_frame = interpolate_and_render(normalized_per_frame, num_frames, 256, 256)
 
-    # 11. Create Overlays and Concatenation
+    # 11. Compute Temporal Stability Maps (Flicker Maps)
+    flicker_global = compute_temporal_variance(pca_frames_global)
+    flicker_per_frame = compute_temporal_variance(pca_frames_per_frame)
+
+    # 12. Create Overlays and Concatenation frames
     overlay_frames = []
     side_by_side_frames = []
+    global_vs_per_frame_frames = []
+    flicker_comparison_frames = []
     
     for t in range(num_frames):
         orig_f = cropped_video[t]
-        pca_f = pca_frames[t]
+        global_f = pca_frames_global[t]
+        per_frame_f = pca_frames_per_frame[t]
         
         # Blend overlay
-        blended = cv2.addWeighted(orig_f, 1.0 - alpha, pca_f, alpha, 0)
+        blended = cv2.addWeighted(orig_f, 1.0 - alpha, global_f, alpha, 0)
         overlay_frames.append(blended)
         
-        # Side by side
-        sbs = np.concatenate([orig_f, pca_f], axis=1)
+        # Side by side (Original | Global PCA)
+        sbs = np.concatenate([orig_f, global_f], axis=1)
         side_by_side_frames.append(sbs)
+
+        # Global vs Per-Frame comparison (Global PCA | Per-Frame PCA)
+        g_vs_pf = np.concatenate([global_f, per_frame_f], axis=1)
+        global_vs_per_frame_frames.append(g_vs_pf)
+
+        # Flicker map side-by-side comparison (Global Variance | Per-Frame Variance)
+        flicker_comp = np.concatenate([flicker_global[t], flicker_per_frame[t]], axis=1)
+        flicker_comparison_frames.append(flicker_comp)
         
     overlay_frames = np.stack(overlay_frames)
     side_by_side_frames = np.stack(side_by_side_frames)
+    global_vs_per_frame_frames = np.stack(global_vs_per_frame_frames)
+    flicker_comparison_frames = np.stack(flicker_comparison_frames)
 
-    # 12. Save videos
-    save_video_clip(pca_frames, os.path.join(args.output_dir, "pca_raw.mp4"))
+    # 13. Save videos
+    save_video_clip(pca_frames_global, os.path.join(args.output_dir, "pca_raw.mp4"))
     save_video_clip(overlay_frames, os.path.join(args.output_dir, "pca_overlay.mp4"))
     save_video_clip(side_by_side_frames, os.path.join(args.output_dir, "pca_side_by_side.mp4"))
+    save_video_clip(global_vs_per_frame_frames, os.path.join(args.output_dir, "pca_global_vs_per_frame.mp4"))
+    save_video_clip(flicker_comparison_frames, os.path.join(args.output_dir, "pca_flicker_comparison.mp4"))
 
-    # 13. Save static Keyframe Grid
+    # 14. Save static Keyframe Grid (4 rows)
     save_keyframe_grid(
         cropped_video,
-        pca_frames,
-        overlay_frames,
+        pca_frames_global,
+        pca_frames_per_frame,
+        flicker_global,
         os.path.join(args.output_dir, "keyframe_grid.png"),
         num_keyframes=8
     )
-    print("\nSUCCESS! PCA feature visualization files generated in:", args.output_dir)
+    print("\nSUCCESS! PCA stability visualization files generated in:", args.output_dir)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
-# Option 2: Ablation and Optimization of Spatial-Temporal Masking Strategies
+# Ablation and Optimization of Spatial-Temporal Masking Strategies
 
-This directory contains the implementations, configurations, visualizations, and scientific findings for **Option 2: Ablation and Optimization of Spatial-Temporal Masking Strategies** for the V-JEPA 2.1 architecture.
+This directory contains the implementations, configurations, visualizations, and scientific findings for **2: Ablation and Optimization of Spatial-Temporal Masking Strategies** for the V-JEPA 2.1 architecture.
 
 ---
 

@@ -1,6 +1,6 @@
-# Option 3: Hierarchical Layer Representation Analysis
+# Hierarchical Layer Representation Analysis
 
-This directory contains implementation, code, visualizations, and scientific findings for **Option 3: Hierarchical Layer Representation Analysis** of the V-JEPA 2.1 architecture.
+This directory contains implementation, code, visualizations, and scientific findings for **3: Hierarchical Layer Representation Analysis** of the V-JEPA 2.1 architecture.
 
 ---
 

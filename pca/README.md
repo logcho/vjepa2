@@ -1,6 +1,6 @@
-# Option 1: Dense Feature Visualization and PCA-based Temporal Tracking
+# Dense Feature Visualization and PCA-based Temporal Tracking
 
-This directory contains the code, visualizations, and scientific findings for **Option 1: Dense Feature Visualization and PCA-based Temporal Tracking** for investigating V-JEPA 2.1 self-supervised representation models.
+This directory contains the code, visualizations, and scientific findings for **Dense Feature Visualization and PCA-based Temporal Tracking** for investigating V-JEPA 2.1 self-supervised representation models.
 
 ---
 

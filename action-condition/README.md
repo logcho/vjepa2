@@ -1,6 +1,6 @@
-# Option 4: Action-Conditioned World Modeling
+# Action-Conditioned World Modeling
 
-This directory contains research explorations, implementation scripts, and visualizations for **Option 4: Action-Conditioned World Modeling** using V-JEPA 2.
+This directory contains research explorations, implementation scripts, and visualizations for **4: Action-Conditioned World Modeling** using V-JEPA 2.
 
 ---
 

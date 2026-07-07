@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V-JEPA 2.1 Tubelet Tokenizer & Attention Tracking Exploration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #070a13;
+            --bg-secondary: #101626;
+            --bg-card: rgba(18, 25, 41, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-primary: #10b981;
+            --accent-secondary: #3b82f6;
+            --accent-glow: rgba(16, 185, 129, 0.15);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-bottom: 80px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #090d16 0%, #064e3b 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #6ee7b7, #3b82f6, #a7f3d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            letter-spacing: -0.02em;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            max-width: 1300px;
+            margin: 40px auto 0 auto;
+            padding: 0 25px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media(min-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .full-width {
+                grid-column: span 2;
+            }
+        }
+        
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(16px);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .card:hover {
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+        
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            color: #6ee7b7;
+        }
+        
+        .card img {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 15px;
+            border: 1px solid var(--border-color);
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        .concept-note {
+            background: rgba(16, 185, 129, 0.05);
+            border-left: 4px solid var(--accent-primary);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+        }
+        
+        .concept-note code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #6ee7b7;
+        }
+        
+        .findings-list {
+            list-style-type: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .findings-list li {
+            position: relative;
+            padding-left: 25px;
+        }
+        
+        .findings-list li::before {
+            content: "✦";
+            position: absolute;
+            left: 0;
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-box {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>V-JEPA 2.1 Tubelet Tokenizer &amp; Attention Tracking</h1>
+        <p>Exploring how V-JEPA 2.1 partitions video spatio-temporal grids into 3D tubelets and tracks attention propagation from high-motion query tokens across transformer depths.</p>
+    </header>
+
+    <div class="container">
+        <div class="dashboard-grid">
+            
+            <!-- Core Concepts of Tubelets -->
+            <div class="card">
+                <h2>📦 Understanding 3D Tubelets</h2>
+                <p>
+                    Unlike standard Vision Transformers (ViTs) that treat video frames as independent images, V-JEPA 2.1 utilizes a <strong>3D Tubelet Tokenizer</strong>.
+                    It maps spatial-temporal cylinders (tubelets) of raw video pixels into distinct token representations.
+                </p>
+                <div class="concept-note">
+                    <strong>Tokenizer Geometry:</strong><br>
+                    - <strong>Spatial Patch Size (H &times; W):</strong> <code>16 &times; 16</code> pixels.<br>
+                    - <strong>Temporal Tubelet Size (T):</strong> <code>2</code> frames.<br>
+                    - <strong>Convolution Projector:</strong> <code>nn.Conv3d</code> with kernel and stride <code>(2, 16, 16)</code>.<br>
+                    - This means a video of shape <code>[16 frames, 256px, 256px]</code> is compressed into <code>8 &times; 16 &times; 16 = 2048</code> tubelet tokens.
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value">2048</div>
+                        <div class="stat-label">Total Tubelet Tokens</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">2 &times; 16 &times; 16</div>
+                        <div class="stat-label">Tubelet Resolution (T x H x W)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tubelet Motion Segmentation -->
+            <div class="card">
+                <h2>🎭 Dynamic vs Static Tubelets</h2>
+                <p>
+                    By computing the temporal differences within each tubelet's pixels, we can segment the video into dynamic (moving) tokens and static (background) tokens.
+                    The chart below highlights the top 8 high-motion vs. top 8 low-motion tubelets extracted from <code>sample_video.mp4</code>.
+                </p>
+                <img src="plots/tubelet_motion_analysis.png" alt="Tubelet Motion Segmentation Chart">
+            </div>
+
+            <!-- Attention Tracking Explanation -->
+            <div class="card">
+                <h2>🔎 Layer-wise Attention Propagation</h2>
+                <p>
+                    To understand how V-JEPA 2.1 integrates visual structures, we selected a high-motion query tubelet (the bowler's arm region at <code>t=7, y=13, x=7</code>) and tracked where its attention propagates at different layers:
+                </p>
+                <ul class="findings-list">
+                    <li><strong>Layer 2 (Early local grouping):</strong> The attention heatmap is extremely localized around the query token itself and its immediate spatial neighbors. The temporal context is ignored, validating that early layers establish spatial boundaries first.</li>
+                    <li><strong>Layer 8 (Spatio-Temporal Tracking):</strong> Attention starts tracking the temporal trajectory. The attention spreads backwards in time, aligning with the path of the bowler's movement. It selectively ignores the static bowling lane background.</li>
+                    <li><strong>Layer 14 (Global Object Grouping):</strong> Attention integrates the entire silhouette of the bowler across the entire duration of the clip. The network binds the moving bowler together as a unified semantic object.</li>
+                    <li><strong>Layer 20 (Disentanglement / Mask prediction):</strong> The attention pattern shifts from simple tracking to a semantic partition mask. The model isolates the background structure of the lane and pins while maintaining focus on the bowler's action, preparing representations for target reconstruction.</li>
+                </ul>
+            </div>
+
+            <!-- Attention Heatmaps Grid -->
+            <div class="card">
+                <h2>🎥 Spatio-Temporal Attention Heatmaps</h2>
+                <p>
+                    Below is the grid of keyframes (at frames 0, 4, 8, 12) showing the query tubelet (marked in green) and the attention maps (colorbar: Jet) overlaid across layers:
+                </p>
+                <img src="plots/query_attention_tracking.png" alt="Attention Tracking Overlays Chart">
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

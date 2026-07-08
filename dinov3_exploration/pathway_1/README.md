@@ -10,7 +10,7 @@ This directory implements the core integration and validation of Pathway 1, conn
 *   [pipeline_visualization.mp4](file:///Users/loganchoi/Desktop/vjepa2/dinov3_exploration/pathway_1/pipeline_visualization.mp4): Visualization video demonstrating live predictions vs ground-truth DINOv3 features.
 *   **Downstream Applications**:
     *   [planning_rl/](file:///Users/loganchoi/Desktop/vjepa2/dinov3_exploration/pathway_1/planning_rl/): Code and configs for utilizing the predictor as a latent world model for trajectory planning and Model Predictive Control (MPC).
-    *   [video_classification/](file:///Users/loganchoi/Desktop/vjepa2/dinov3_exploration/pathway_1/video_classification/): Implementation of action recognition via linear probing or training lightweight MLPs on top of the predictor tokens.
+    *   [video_classification/](file:///Users/loganchoi/Desktop/vjepa2/dinov3_exploration/pathway_1/video_classification/): Implementation of spatiotemporal action recognition via linear probing and MLP classification on predicted future features. Includes [generate_data.py](file:///Users/loganchoi/Desktop/vjepa2/dinov3_exploration/pathway_1/video_classification/generate_data.py) (synthetic action videos with pre-extracted DINOv3 features) and [train_probe.py](file:///Users/loganchoi/Desktop/vjepa2/dinov3_exploration/pathway_1/video_classification/train_probe.py) (training/evaluating spatiotemporal classification probes).
     *   [anomaly_detection/](file:///Users/loganchoi/Desktop/vjepa2/dinov3_exploration/pathway_1/anomaly_detection/): Scripts for live video anomaly/prediction error monitoring based on prediction loss spikes.
     *   [inpainting_decoding/](file:///Users/loganchoi/Desktop/vjepa2/dinov3_exploration/pathway_1/inpainting_decoding/): Code for training decoder networks to project predictor latent states back to pixel space for video inpainting and synthesis.
 
@@ -37,9 +37,14 @@ Use the V-JEPA predictor as a simulator of visual semantics:
 *   Evaluate predicted latents $\hat{z}_{t+K}$ against target task rewards to plan optimal action sequences without rendering intermediate pixels.
 
 ### 2. Action Recognition (`video_classification/`)
-Train linear classifiers on frozen predictor states:
-*   Extract the predictor outputs corresponding to the target masked frames.
-*   Pool or flatten these output tokens and feed them to a small classifier head to classify activities.
+Train linear and MLP classifiers on frozen predictor spatiotemporal features:
+*   **Methodology**: Extract spatiotemporal representations by masking frames 4–7 (the future) and predicting them using context frames 0–3. Pooled target predictions `y_pred` represent future dynamics.
+*   **Probing Accuracy**:
+    *   **Baseline A (DINOv3-Mean)**: **`57.5%`** (Temporal order lost).
+    *   **Baseline B (DINOv3-Concat)**: **`85.0%`** (Temporally flattened).
+    *   **V-JEPA Predictor (Random Mask MLP)**: **`62.5%`** (Noisy due to dynamic masks).
+    *   **V-JEPA Predictor (Causal Future MLP)**: **`95.0%`** (Strong spatiotemporal modeling).
+*   The high accuracy of the Causal Future MLP probe proves that V-JEPA's predictions of the future are highly discriminative of video dynamics. See the full [video_classification README](file:///Users/loganchoi/Desktop/vjepa2/dinov3_exploration/pathway_1/video_classification/README.md) for details.
 
 ### 3. Live Anomaly Detection (`anomaly_detection/`)
 Monitor feature prediction errors:

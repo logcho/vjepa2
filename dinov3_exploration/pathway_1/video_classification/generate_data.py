@@ -12,8 +12,8 @@ sys.path.append("/Users/loganchoi/Desktop/dinov3/dinov3")
 
 def generate_trajectories(num_samples_per_class, T=8, frame_size=448, circle_radius=30):
     """
-    Generates trajectories for 8 different action classes.
-    Returns list of trajectories (each is a list of T (x, y) coordinates) and labels.
+    Generates trajectories for 8 different action classes with spatial noise,
+    variable velocity, and elliptical distortions to simulate human hand tracking.
     """
     trajectories = []
     labels = []
@@ -36,61 +36,86 @@ def generate_trajectories(num_samples_per_class, T=8, frame_size=448, circle_rad
             if label == 0:  # Horizontal Left-to-Right
                 x = np.random.uniform(40, 80)
                 y = np.random.uniform(200, 248)
-                dx = np.random.uniform(40, 50)
+                dx = np.random.uniform(30, 60)
                 dy = np.random.uniform(-4, 4)
                 for t in range(T):
-                    coords.append((x + t*dx, y + t*dy))
+                    jitter_x = np.random.uniform(-10, 10)
+                    jitter_y = np.random.uniform(-15, 15)
+                    coords.append((x + t*dx + jitter_x, y + t*dy + jitter_y))
+                    dx *= np.random.uniform(0.9, 1.1)  # Variable velocity
                     
             elif label == 1:  # Horizontal Right-to-Left
                 x = np.random.uniform(368, 408)
                 y = np.random.uniform(200, 248)
-                dx = np.random.uniform(-50, -40)
+                dx = np.random.uniform(-60, -30)
                 dy = np.random.uniform(-4, 4)
                 for t in range(T):
-                    coords.append((x + t*dx, y + t*dy))
+                    jitter_x = np.random.uniform(-10, 10)
+                    jitter_y = np.random.uniform(-15, 15)
+                    coords.append((x + t*dx + jitter_x, y + t*dy + jitter_y))
+                    dx *= np.random.uniform(0.9, 1.1)
                     
             elif label == 2:  # Vertical Bottom-to-Top
                 x = np.random.uniform(200, 248)
                 y = np.random.uniform(368, 408)
                 dx = np.random.uniform(-4, 4)
-                dy = np.random.uniform(-50, -40)
+                dy = np.random.uniform(-60, -30)
                 for t in range(T):
-                    coords.append((x + t*dx, y + t*dy))
+                    jitter_x = np.random.uniform(-15, 15)
+                    jitter_y = np.random.uniform(-10, 10)
+                    coords.append((x + t*dx + jitter_x, y + t*dy + jitter_y))
+                    dy *= np.random.uniform(0.9, 1.1)
                     
             elif label == 3:  # Vertical Top-to-Bottom
                 x = np.random.uniform(200, 248)
                 y = np.random.uniform(40, 80)
                 dx = np.random.uniform(-4, 4)
-                dy = np.random.uniform(40, 50)
+                dy = np.random.uniform(30, 60)
                 for t in range(T):
-                    coords.append((x + t*dx, y + t*dy))
+                    jitter_x = np.random.uniform(-15, 15)
+                    jitter_y = np.random.uniform(-10, 10)
+                    coords.append((x + t*dx + jitter_x, y + t*dy + jitter_y))
+                    dy *= np.random.uniform(0.9, 1.1)
                     
-            elif label == 4 or label == 5:  # Circles (4: CW, 5: CCW)
-                cx = np.random.uniform(210, 238)
-                cy = np.random.uniform(210, 238)
-                r = np.random.uniform(100, 130)
+            elif label == 4 or label == 5:  # Circles (4: CW, 5: CCW) -> Now Ellipses
+                cx = np.random.uniform(180, 268)
+                cy = np.random.uniform(180, 268)
+                rx = np.random.uniform(80, 150)
+                ry = np.random.uniform(80, 150)
                 start_angle = np.random.uniform(0, 2*np.pi)
-                #CW uses negative step, CCW uses positive step
-                step = -2*np.pi / 8.5 if label == 4 else 2*np.pi / 8.5
+                # CW uses negative step, CCW uses positive step
+                base_step = -2*np.pi / 8.5 if label == 4 else 2*np.pi / 8.5
+                angle = start_angle
                 for t in range(T):
-                    angle = start_angle + t * step
-                    coords.append((cx + r*np.cos(angle), cy + r*np.sin(angle)))
+                    jitter_x = np.random.uniform(-12, 12)
+                    jitter_y = np.random.uniform(-12, 12)
+                    coords.append((cx + rx*np.cos(angle) + jitter_x, cy + ry*np.sin(angle) + jitter_y))
+                    step = base_step * np.random.uniform(0.8, 1.2)  # Variable velocity
+                    angle += step
                     
             elif label == 6:  # Diagonal Top-Left to Bottom-Right
-                x = np.random.uniform(40, 80)
-                y = np.random.uniform(40, 80)
-                dx = np.random.uniform(40, 50)
-                dy = np.random.uniform(40, 50)
+                x = np.random.uniform(40, 120)
+                y = np.random.uniform(40, 120)
+                dx = np.random.uniform(30, 50)
+                dy = np.random.uniform(30, 50)
                 for t in range(T):
-                    coords.append((x + t*dx, y + t*dy))
+                    jitter_x = np.random.uniform(-15, 15)
+                    jitter_y = np.random.uniform(-15, 15)
+                    coords.append((x + t*dx + jitter_x, y + t*dy + jitter_y))
+                    dx *= np.random.uniform(0.9, 1.1)
+                    dy *= np.random.uniform(0.9, 1.1)
                     
             elif label == 7:  # Diagonal Bottom-Left to Top-Right
-                x = np.random.uniform(40, 80)
-                y = np.random.uniform(368, 408)
-                dx = np.random.uniform(40, 50)
-                dy = np.random.uniform(-50, -40)
+                x = np.random.uniform(40, 120)
+                y = np.random.uniform(328, 408)
+                dx = np.random.uniform(30, 50)
+                dy = np.random.uniform(-50, -30)
                 for t in range(T):
-                    coords.append((x + t*dx, y + t*dy))
+                    jitter_x = np.random.uniform(-15, 15)
+                    jitter_y = np.random.uniform(-15, 15)
+                    coords.append((x + t*dx + jitter_x, y + t*dy + jitter_y))
+                    dx *= np.random.uniform(0.9, 1.1)
+                    dy *= np.random.uniform(0.9, 1.1)
             
             # Clip coords to boundaries
             coords = [(np.clip(x, circle_radius, frame_size - circle_radius),
@@ -111,8 +136,8 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(os.path.join(output_dir, "visualizations"), exist_ok=True)
     
-    # 25 samples per class (20 train, 5 validation)
-    num_samples_per_class = 25
+    # 200 samples per class
+    num_samples_per_class = 200
     T = 8
     frame_size = 448
     circle_radius = 30

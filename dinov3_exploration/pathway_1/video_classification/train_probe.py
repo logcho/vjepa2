@@ -110,14 +110,14 @@ def main():
     num_videos, T, N_patches, D = features_np.shape
     print(f"Loaded {num_videos} videos. Length={T}, Patches={N_patches}, Dim={D}")
     
-    # 2. Split dataset (first 20 per class = train, last 5 = val)
+    # 2. Split dataset (first 160 per class = train, last 40 = val)
     train_idx = []
     val_idx = []
-    samples_per_class = 25
+    samples_per_class = 200
     for c in range(8):
         start = c * samples_per_class
-        train_idx.extend(range(start, start + 20))
-        val_idx.extend(range(start + 20, start + 25))
+        train_idx.extend(range(start, start + 160))
+        val_idx.extend(range(start + 160, start + 200))
         
     train_idx = np.array(train_idx)
     val_idx = np.array(val_idx)
@@ -266,6 +266,11 @@ def main():
     vjepa_mlp_model_causal = MLPProbe(input_dim=D)
     ta_vj_mlp_c, va_vj_mlp_c = train_eval_model(vjepa_mlp_model_causal, train_vjepa_reprs_causal, train_labels.to(device), val_vjepa_reprs_causal, val_labels.to(device), epochs=100)
     print(f"V-JEPA (Causal Future) MLP Probe Final Accuracy - Train: {ta_vj_mlp_c[-1]:.4f} | Val: {va_vj_mlp_c[-1]:.4f}")
+    
+    # Save the best MLP probe
+    mlp_save_path = os.path.join(data_dir, "mlp_probe.pth")
+    torch.save(vjepa_mlp_model_causal.state_dict(), mlp_save_path)
+    print(f"Saved MLP Probe weights to: {mlp_save_path}")
     
     # 8. Plot Accuracy Curves
     plt.figure(figsize=(10, 6))
